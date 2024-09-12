@@ -1299,6 +1299,7 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 	vsCodeKeywordColor := tcell.NewHexColor(0xca9ee6)
 	// vsCodeIdentiferColor := tcell.NewHexColor(0x87a4e5)
 	// vsCodeVarColor := tcell.NewHexColor(0xea999c)
+	vsCodeStrColor := tcell.NewHexColor(0x9dc583)
 
 	tokens := [...]TokenDef{
 		{
@@ -1315,7 +1316,7 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 		},
 	}
 
-	str_hl_span := HighlightSpan{Style: sty.Foreground(tcell.ColorGreen)}
+	str_hl_span := HighlightSpan{Style: sty.Foreground(vsCodeStrColor)}
 	str_hl_span_found := false
 
 	for pos2[0] != 1 {
