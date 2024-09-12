@@ -1264,12 +1264,52 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 		}
 	}
 
+	
 	// Print the text.
 	var cluster, text string
+	var cluster2, text2 string
 	line := t.rowOffset
 	pos := t.lineStarts[line]
+	pos2 := t.lineStarts[line]
 	endPos := pos
+	endPos2 := pos2
 	posX, posY := 0, 0
+
+	type Pair struct {
+		Start, Size int
+	}
+
+	var count int
+	pairs := make([]Pair, 0, 10)
+
+	wbuff := ""
+
+	var sty tcell.Style = t.textStyle
+	var sty2 tcell.Style = t.textStyle
+
+	for pos2[0] != 1 {
+		var clusterWidth2 int
+		cluster2, text2, _, clusterWidth2, pos2, endPos2 = t.step(text2, pos2, endPos2)
+		if posX+clusterWidth2-columnOffset <= width && posX-columnOffset >= 0 && clusterWidth2 > 0 {
+
+			wbuff += cluster2
+			if strings.Contains(wbuff, "package") {
+				sty2 = sty.Foreground(tcell.ColorYellow)
+				size := 7
+				start := count - size
+
+				pairs = append(pairs, Pair{
+					Start: start,
+					Size:  size,
+				})
+
+				wbuff = ""
+			}
+			count++
+		}
+	}
+
+	var rcount = 0
 	for pos[0] != 1 {
 		var clusterWidth int
 		cluster, text, _, clusterWidth, pos, endPos = t.step(text, pos, endPos)
@@ -1301,7 +1341,18 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 
 		// Draw character.
 		if posX+clusterWidth-columnOffset <= width && posX-columnOffset >= 0 && clusterWidth > 0 {
-			screen.SetContent(x+posX-columnOffset, y+posY, runes[0], runes[1:], style)
+			tsty := sty
+
+			for i := 0; i < len(pairs); i++ {
+				if rcount >= pairs[i].Start && rcount <= pairs[i].Start+pairs[i].Size {
+					tsty = sty2
+					break
+				}
+			}
+
+			screen.SetContent(x+posX-columnOffset, y+posY, runes[0], runes[1:], tsty)
+
+			rcount++
 		}
 
 		// Advance.
