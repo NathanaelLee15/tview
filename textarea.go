@@ -1295,14 +1295,19 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 
 	var sty tcell.Style = t.textStyle
 
+	// vsCodeBgColor := tcell.NewHexColor(0x303446)
+	vsCodeKeywordColor := tcell.NewHexColor(0xca9ee6)
+	// vsCodeIdentiferColor := tcell.NewHexColor(0x87a4e5)
+	// vsCodeVarColor := tcell.NewHexColor(0xea999c)
+
 	tokens := [...]TokenDef{
 		{
 			Str:   "package",
-			Style: sty.Foreground(tcell.ColorPurple),
+			Style: sty.Foreground(vsCodeKeywordColor),
 		},
 		{
 			Str:   "func",
-			Style: sty.Foreground(tcell.ColorPurple),
+			Style: sty.Foreground(vsCodeKeywordColor),
 		},
 		{
 			Str:   "import",
