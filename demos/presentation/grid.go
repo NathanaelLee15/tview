@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+	"github.com/nathanaellee15/tview"
 )
 
 // Grid demonstrates the grid layout.
