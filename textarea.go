@@ -1264,7 +1264,6 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 		}
 	}
 
-	
 	// Print the text.
 	var cluster, text string
 	var cluster2, text2 string
@@ -1279,13 +1278,40 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 		Start, Size int
 	}
 
+	type HighlightSpan struct {
+		Style tcell.Style
+		Pair
+	}
+
+	type TokenDef struct {
+		Str   string
+		Style tcell.Style
+	}
+
 	var count int
-	pairs := make([]Pair, 0, 10)
+	hl_spans := make([]HighlightSpan, 0, 10)
 
 	wbuff := ""
 
 	var sty tcell.Style = t.textStyle
-	var sty2 tcell.Style = t.textStyle
+
+	tokens := [...]TokenDef{
+		{
+			Str:   "package",
+			Style: sty.Foreground(tcell.ColorPurple),
+		},
+		{
+			Str:   "func",
+			Style: sty.Foreground(tcell.ColorPurple),
+		},
+		{
+			Str:   "import",
+			Style: sty.Foreground(tcell.ColorCornflowerBlue),
+		},
+	}
+
+	str_hl_span := HighlightSpan{Style: sty.Foreground(tcell.ColorGreen)}
+	str_hl_span_found := false
 
 	for pos2[0] != 1 {
 		var clusterWidth2 int
@@ -1293,18 +1319,37 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 		if posX+clusterWidth2-columnOffset <= width && posX-columnOffset >= 0 && clusterWidth2 > 0 {
 
 			wbuff += cluster2
-			if strings.Contains(wbuff, "package") {
-				sty2 = sty.Foreground(tcell.ColorYellow)
-				size := 7
-				start := count - size
 
-				pairs = append(pairs, Pair{
-					Start: start,
-					Size:  size,
-				})
-
-				wbuff = ""
+			if strings.Contains(cluster2, string('"')) {
+				if str_hl_span_found {
+					str_hl_span.Size = (count + 1) - str_hl_span.Start
+					hl_spans = append(hl_spans, str_hl_span)
+					str_hl_span_found = false
+					wbuff = ""
+				} else {
+					str_hl_span_found = true
+					str_hl_span.Start = count
+					str_hl_span.Size = count + 1
+				}
+				count++
+				continue
 			}
+
+			for _, token := range tokens {
+				if strings.Contains(wbuff, token.Str) {
+					size := len(token.Str)
+					start := (1 + count) - size
+
+					hl_span := HighlightSpan{Style: token.Style}
+					hl_span.Start = start
+					hl_span.Size = size
+					hl_spans = append(hl_spans, hl_span)
+
+					wbuff = ""
+					break
+				}
+			}
+
 			count++
 		}
 	}
@@ -1343,11 +1388,15 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 		if posX+clusterWidth-columnOffset <= width && posX-columnOffset >= 0 && clusterWidth > 0 {
 			tsty := sty
 
-			for i := 0; i < len(pairs); i++ {
-				if rcount >= pairs[i].Start && rcount <= pairs[i].Start+pairs[i].Size {
-					tsty = sty2
-					break
+			if style != t.selectedStyle {
+				for _, hlsp := range hl_spans {
+					if rcount >= hlsp.Start && rcount < hlsp.Start+hlsp.Size {
+						tsty = hlsp.Style
+						break
+					}
 				}
+			} else {
+				tsty = style
 			}
 
 			screen.SetContent(x+posX-columnOffset, y+posY, runes[0], runes[1:], tsty)
