@@ -1,6 +1,6 @@
 module github.com/nathanaellee15/tview
 
-go 1.18
+go 1.23
 
 require (
 	github.com/gdamore/tcell/v2 v2.7.1
