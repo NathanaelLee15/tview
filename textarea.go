@@ -1538,7 +1538,7 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 			if style != t.selectedStyle {
 				for _, hlsp := range hl_spans {
 					if rcount >= hlsp.Start && rcount < hlsp.Start+hlsp.Size {
-						tsty.Foreground(hlsp.Style)
+						tsty = tsty.Foreground(hlsp.Style)
 						break
 					}
 				}
