@@ -1158,6 +1158,182 @@ func (t *TextArea) replace(deleteStart, deleteEnd [3]int, insert string, continu
 	return deleteEnd
 }
 
+type Pair struct {
+	Start, Size int
+}
+
+type HighlightSpan struct {
+	Style tcell.Color
+	Pair
+}
+
+type TokenDef struct {
+	Str   string
+	Style tcell.Color
+}
+
+var vsCodeBgColor = tcell.NewHexColor(0x303446)
+var vsCodeKeywordColor = tcell.NewHexColor(0xca9ee6)
+var vsCodeIdentiferColor = tcell.NewHexColor(0x87a4e5)
+var vsCodeSymbolColor = tcell.ColorYellow // TODO: get custom color
+var vsCodeVarColor = tcell.NewHexColor(0xea999c)
+var vsCodeStrColor = tcell.NewHexColor(0x9dc583)
+
+/* TODO: impl other tokens
+// std
+"Println":  vsCodeIdentiferColor.CSS(),
+"Printf":   vsCodeIdentiferColor.CSS(),
+"Sprintf":  vsCodeIdentiferColor.CSS(),
+"Sprintln": vsCodeIdentiferColor.CSS(),
+*/
+
+var tokens = [...]TokenDef{
+	{
+		Str:   "package",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "func",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "import",
+		Style: vsCodeIdentiferColor,
+	},
+	{
+		Str:   "main",
+		Style: vsCodeIdentiferColor,
+	},
+	{
+		Str:   "module",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "require",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "var",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "if",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "else",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "for",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "switch",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "case",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "range",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "map",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "string",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "type",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "make",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "struct",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "0x",
+		Style: vsCodeKeywordColor,
+	},
+	{
+		Str:   "nil",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "++",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "--",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "+=",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "-=",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "==",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "!=",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "&&",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "||",
+		Style: vsCodeVarColor,
+	},
+	{
+		Str:   "(",
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   ")",
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   "{",
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   "}",
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   "'",
+		Style: vsCodeStrColor,
+	},
+	{
+		Str:   "\"",
+		Style: vsCodeStrColor,
+	},
+	{
+		Str:   "//",
+		Style: vsCodeStrColor,
+	},
+	{
+		Str:   "///",
+		Style: vsCodeStrColor,
+	},
+}
+
 // Draw draws this primitive onto the screen.
 func (t *TextArea) Draw(screen tcell.Screen) {
 	t.Box.DrawForSubclass(screen, t)
@@ -1274,20 +1450,6 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 	endPos2 := pos2
 	posX, posY := 0, 0
 
-	type Pair struct {
-		Start, Size int
-	}
-
-	type HighlightSpan struct {
-		Style tcell.Style
-		Pair
-	}
-
-	type TokenDef struct {
-		Str   string
-		Style tcell.Style
-	}
-
 	var count int
 	hl_spans := make([]HighlightSpan, 0, 10)
 
@@ -1295,28 +1457,7 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 
 	var sty tcell.Style = t.textStyle
 
-	// vsCodeBgColor := tcell.NewHexColor(0x303446)
-	vsCodeKeywordColor := tcell.NewHexColor(0xca9ee6)
-	// vsCodeIdentiferColor := tcell.NewHexColor(0x87a4e5)
-	// vsCodeVarColor := tcell.NewHexColor(0xea999c)
-	vsCodeStrColor := tcell.NewHexColor(0x9dc583)
-
-	tokens := [...]TokenDef{
-		{
-			Str:   "package",
-			Style: sty.Foreground(vsCodeKeywordColor),
-		},
-		{
-			Str:   "func",
-			Style: sty.Foreground(vsCodeKeywordColor),
-		},
-		{
-			Str:   "import",
-			Style: sty.Foreground(tcell.ColorCornflowerBlue),
-		},
-	}
-
-	str_hl_span := HighlightSpan{Style: sty.Foreground(vsCodeStrColor)}
+	str_hl_span := HighlightSpan{Style: vsCodeStrColor}
 	str_hl_span_found := false
 
 	for pos2[0] != 1 {
@@ -1397,7 +1538,7 @@ func (t *TextArea) Draw(screen tcell.Screen) {
 			if style != t.selectedStyle {
 				for _, hlsp := range hl_spans {
 					if rcount >= hlsp.Start && rcount < hlsp.Start+hlsp.Size {
-						tsty = hlsp.Style
+						tsty.Foreground(hlsp.Style)
 						break
 					}
 				}
