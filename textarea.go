@@ -1172,7 +1172,7 @@ type TokenDef struct {
 	Style tcell.Color
 }
 
-var vsCodeBgColor = tcell.NewHexColor(0x303446)
+// var vsCodeBgColor = tcell.NewHexColor(0x303446)
 var vsCodeKeywordColor = tcell.NewHexColor(0xca9ee6)
 var vsCodeIdentiferColor = tcell.NewHexColor(0x87a4e5)
 var vsCodeSymbolColor = tcell.ColorYellow // TODO: get custom color
@@ -1270,35 +1270,39 @@ var tokens = [...]TokenDef{
 	},
 	{
 		Str:   "++",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "--",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "+=",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "-=",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   ":=",
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "==",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "!=",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "&&",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "||",
-		Style: vsCodeVarColor,
+		Style: vsCodeSymbolColor,
 	},
 	{
 		Str:   "(",
@@ -1314,6 +1318,14 @@ var tokens = [...]TokenDef{
 	},
 	{
 		Str:   "}",
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   "[",
+		Style: vsCodeSymbolColor,
+	},
+	{
+		Str:   "]",
 		Style: vsCodeSymbolColor,
 	},
 	{
